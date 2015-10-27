@@ -130,7 +130,7 @@ BOOL CAutoClickerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	m_DelayEdit.SetWindowTextW(L"250");
+	m_DelayEdit.SetWindowTextW(L"10");
 	SetWindowsHookEx(WH_KEYBOARD_LL, LLKeyHook, 0, 0);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
