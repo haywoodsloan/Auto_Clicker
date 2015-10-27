@@ -102,7 +102,6 @@ LRESULT CALLBACK LLKeyHook(int nCode, WPARAM wParam, LPARAM lParam)
 					clicking = NULL;
 
 					ReleaseSemaphore(semaphore, 1, 0);
-
 				}
 				else {
 					clicking = new bool(1);
