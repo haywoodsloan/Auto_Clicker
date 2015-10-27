@@ -85,12 +85,12 @@ LRESULT CALLBACK LLKeyHook(int nCode, WPARAM wParam, LPARAM lParam)
 			if (newShortcut) {
 				shortcut = khs->vkCode;
 
-				WCHAR buff[10];
-				DWORD dwMsg = 0;
+				WCHAR buff[25];
+				DWORD dwMsg = 1;
 				dwMsg += khs->scanCode << 16;
 				dwMsg += khs->flags << 24;
 
-				GetKeyNameText(dwMsg, buff, 10);
+				GetKeyNameText(dwMsg, buff, 25);
 				m_HotkeyBtn.SetWindowText(buff);
 
 				newShortcut = false;
