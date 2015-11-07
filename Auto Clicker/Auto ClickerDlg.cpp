@@ -187,5 +187,6 @@ HBRUSH CAutoClickerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if (pWnd->GetDlgCtrlID() == IDC_INDICATOR) {
 		return (clicking != NULL) ? m_GreenBrush : m_RedBrush;
 	}
+
 	return hbr;
 }
