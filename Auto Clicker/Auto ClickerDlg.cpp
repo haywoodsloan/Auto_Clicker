@@ -19,9 +19,9 @@ CStatic m_Indicator;
 
 bool newShortcut = false;
 bool *clicking = NULL;
+std::timed_mutex* mutex = NULL;
 
 DWORD shortcut = VK_F4;
-HANDLE semaphore;
 HBRUSH m_RedBrush = CreateSolidBrush(RGB(255, 0, 0));
 HBRUSH m_GreenBrush = CreateSolidBrush(RGB(0, 255, 0));
 
@@ -51,11 +51,10 @@ END_MESSAGE_MAP()
 
 struct threadParam {
 	bool* active;
-	HANDLE semaphore;
+	std::timed_mutex* threadMutex;
 };
 
-DWORD WINAPI clickThreadProc(LPVOID lParam) {
-	threadParam *param = (threadParam*)lParam;
+void clickThreadProc(threadParam* param) {
 
 	int delayLength = m_DelayEdit.GetWindowTextLengthW();
 	WCHAR *delayString = new WCHAR[delayLength + 1];
@@ -66,14 +65,12 @@ DWORD WINAPI clickThreadProc(LPVOID lParam) {
 
 	while (*param->active) {
 		mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-		WaitForSingleObject(param->semaphore, sleepDuration);
+		param->threadMutex->try_lock_for(std::chrono::milliseconds(sleepDuration));
 	}
 
 	delete param->active;
-	CloseHandle(param->semaphore);
+	delete param->threadMutex;
 	delete param;
-
-	return 0;
 }
 
 LRESULT CALLBACK LLKeyHook(int nCode, WPARAM wParam, LPARAM lParam)
@@ -101,14 +98,17 @@ LRESULT CALLBACK LLKeyHook(int nCode, WPARAM wParam, LPARAM lParam)
 					*clicking = false;
 					clicking = NULL;
 
-					ReleaseSemaphore(semaphore, 1, 0);
+					mutex->unlock();
 				}
 				else {
 					clicking = new bool(1);
-					semaphore = CreateSemaphore(0, 0, 1, 0);
+					mutex = new std::timed_mutex();
+					mutex->lock();
 
-					threadParam *param = new threadParam{ clicking, semaphore };
-					CreateThread(0, 0, clickThreadProc, LPVOID(param), 0, 0);
+					threadParam *param = new threadParam{ clicking, mutex };
+					
+					std::thread clickThread(clickThreadProc, param);
+					clickThread.detach();
 				}
 
 				m_Indicator.RedrawWindow();

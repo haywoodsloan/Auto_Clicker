@@ -4,6 +4,8 @@
 
 #pragma once
 #include "afxwin.h"
+#include <thread>
+#include <mutex>
 
 
 // CAutoClickerDlg dialog
