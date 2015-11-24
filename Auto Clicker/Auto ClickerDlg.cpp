@@ -14,6 +14,7 @@
 
 // CAutoClickerDlg dialog
 CButton m_HotkeyBtn;
+CButton m_ClickRadio;
 CEdit m_DelayEdit;
 CStatic m_Indicator;
 
@@ -38,6 +39,7 @@ void CAutoClickerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_HOTKEYBTN, m_HotkeyBtn);
 	DDX_Control(pDX, IDC_DELAY, m_DelayEdit);
 	DDX_Control(pDX, IDC_INDICATOR, m_Indicator);
+	DDX_Control(pDX, IDC_RADIO1, m_ClickRadio);
 }
 
 BEGIN_MESSAGE_MAP(CAutoClickerDlg, CDialogEx)
@@ -64,7 +66,9 @@ void clickThreadProc(threadParam* param) {
 	delete[] delayString;
 
 	while (*param->active) {
-		mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		m_ClickRadio.GetCheck() ? mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0) :
+			mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+
 		param->threadMutex->try_lock_for(std::chrono::milliseconds(sleepDuration));
 	}
 
@@ -130,6 +134,7 @@ BOOL CAutoClickerDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	m_DelayEdit.SetWindowTextW(L"10");
+	m_ClickRadio.SetCheck(TRUE);
 	SetWindowsHookEx(WH_KEYBOARD_LL, LLKeyHook, 0, 0);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
